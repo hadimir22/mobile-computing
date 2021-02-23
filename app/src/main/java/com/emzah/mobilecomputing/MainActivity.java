@@ -102,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
          return false;
     }
 
+    
+
     private void initializeViews() {
         userNameEt = findViewById(R.id.et_username);
         passwordEt = findViewById(R.id.et_password);

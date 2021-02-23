@@ -10,12 +10,17 @@ import android.view.Menu;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.emzah.mobilecomputing.Database.AppDatabase;
+import com.emzah.mobilecomputing.model.Reminder;
+import com.emzah.mobilecomputing.utils.AppExecutors;
+import com.emzah.mobilecomputing.viewmodel.ReminderViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,11 +33,15 @@ public class HomeActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private String m_Text = "";
+    private AppDatabase appDatabase;
+    private ReminderViewModel reminderViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        appDatabase = AppDatabase.getInstance(getApplicationContext());
+        reminderViewModel = new ViewModelProvider(this).get(ReminderViewModel.class);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -43,15 +52,31 @@ public class HomeActivity extends AppCompatActivity {
                 builder.setTitle("Add Reminder");
 
                 final EditText input = new EditText(HomeActivity.this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 builder.setView(input);
 
-                builder.setPositiveButton("OK", (dialog, which) -> m_Text = input.getText().toString());
-                builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        m_Text = input.getText().toString();
+                        Reminder reminder = new Reminder(System.currentTimeMillis(),m_Text,"2.3","3.33","2:3","reme","2.33");
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                appDatabase.reminderDao().insertReminder(reminder);
+                                reminderViewModel.getDataFromDb();
+                            }
+                        });
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
 
                 builder.show();
-//                Snackbar.make(view, "Reminder Added", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
+
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
