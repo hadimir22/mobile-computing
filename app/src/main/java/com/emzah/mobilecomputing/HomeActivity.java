@@ -1,13 +1,24 @@
 package com.emzah.mobilecomputing;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.emzah.mobilecomputing.Database.AppDatabase;
@@ -19,6 +30,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -28,6 +40,14 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import java.util.Date;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -35,6 +55,7 @@ public class HomeActivity extends AppCompatActivity {
     private String m_Text = "";
     private AppDatabase appDatabase;
     private ReminderViewModel reminderViewModel;
+    public static final String WORKER_TAG = "notification_worker";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +72,48 @@ public class HomeActivity extends AppCompatActivity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
                 builder.setTitle("Add Reminder");
 
-                final EditText input = new EditText(HomeActivity.this);
-                builder.setView(input);
+                LayoutInflater inflater= LayoutInflater.from(HomeActivity.this);
+                View layout=inflater.inflate(R.layout.dialog_layout,null);
+                EditText input = layout.findViewById(R.id.msg_et);
+                TimePicker timePicker = layout.findViewById(R.id.simpleTimePicker);
+                timePicker.setIs24HourView(false);
+
+                builder.setView(layout);
 
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                         Date date = new Date();
+                        Calendar calAlarm = Calendar.getInstance();
+                        Calendar calNow = Calendar.getInstance();
+
+                        calNow.setTime(date);
+                        calAlarm.setTime(date);
+
+                        calAlarm.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
+                        calAlarm.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+                        calAlarm.set(Calendar.SECOND,0);
+
+//                        if (calAlarm.before(calNow)){
+//                            calAlarm.add(Calendar.DATE,1);
+//                        }
+
+
                         m_Text = input.getText().toString();
-                        Reminder reminder = new Reminder(System.currentTimeMillis(),m_Text,"2.3","3.33","2:3","reme","2.33");
+                        Reminder reminder = new Reminder(System.currentTimeMillis(),m_Text,"2.3","3.33",calAlarm.getTimeInMillis(),"reme","2.33");
                         AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
+                           @Override
                             public void run() {
                                 appDatabase.reminderDao().insertReminder(reminder);
                                 reminderViewModel.getDataFromDb();
+                                Intent intent = new Intent(HomeActivity.this,Notificationreceiver.class);
+                                intent.putExtra("title",reminder.getMessage());
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(HomeActivity.this,123,intent,0);
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calAlarm.getTimeInMillis(),
+                                        AlarmManager.INTERVAL_DAY, pendingIntent);
+                                m_Text = "";
+
                             }
                         });
                     }

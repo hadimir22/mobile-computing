@@ -14,11 +14,9 @@ import java.util.List;
 @Dao
 public interface ReminderDao {
 
-    @Query("SELECT * FROM reminders")
-    LiveData<List<Reminder>> getAllReminders();
+    @Query("SELECT * FROM reminders WHERE reminder_time <= :time")
+    LiveData<List<Reminder>> getAllReminders(long time);
 
-//    @Query("UPDATE reminders SET message = message where creator_id = :creatorId")
-//    void updateReminder(long creatorId,String message);
     @Update
      void updateReminder(Reminder reminder);
 

@@ -21,7 +21,7 @@ public class ReminderViewModel extends AndroidViewModel {
     public ReminderViewModel(@NonNull Application application) {
         super(application);
          appDatabase = AppDatabase.getInstance(application);
-        reminderLiveData = appDatabase.reminderDao().getAllReminders();
+        reminderLiveData = appDatabase.reminderDao().getAllReminders(System.currentTimeMillis());
     }
 
     public LiveData<List<Reminder>> getReminderLiveData() {
@@ -32,7 +32,7 @@ public class ReminderViewModel extends AndroidViewModel {
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                reminderLiveData = appDatabase.reminderDao().getAllReminders();
+                reminderLiveData = appDatabase.reminderDao().getAllReminders(System.currentTimeMillis());
             }
         });
 
