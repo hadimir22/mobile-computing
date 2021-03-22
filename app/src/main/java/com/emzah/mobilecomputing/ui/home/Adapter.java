@@ -63,7 +63,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.ReminderViewHolder> {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        Reminder reminder = new Reminder(reminderList.get(position).getCreatorId(),input.getText().toString(),"2.3","3.33",reminderList.get(position).getReminderTime(),"reme","2.33");
+                        Reminder reminder = new Reminder(reminderList.get(position).getCreatorId(),input.getText().toString(),2.2,2.3,reminderList.get(position).getReminderTime(),"reme","2.33");
                         AppExecutors.getInstance().diskIO().execute(new Runnable() {
                             @Override
                             public void run() {

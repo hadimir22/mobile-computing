@@ -56,6 +56,7 @@ public class HomeActivity extends AppCompatActivity {
     private AppDatabase appDatabase;
     private ReminderViewModel reminderViewModel;
     public static final String WORKER_TAG = "notification_worker";
+    private NavController navController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +101,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
                         m_Text = input.getText().toString();
-                        Reminder reminder = new Reminder(System.currentTimeMillis(),m_Text,"2.3","3.33",calAlarm.getTimeInMillis(),"reme","2.33");
+                        Reminder reminder = new Reminder(System.currentTimeMillis(),m_Text,2.2,2.3,calAlarm.getTimeInMillis(),"reme","2.33");
                         AppExecutors.getInstance().diskIO().execute(new Runnable() {
                            @Override
                             public void run() {
@@ -137,7 +138,7 @@ public class HomeActivity extends AppCompatActivity {
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
                 .setDrawerLayout(drawer)
                 .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
     }
@@ -155,6 +156,9 @@ public class HomeActivity extends AppCompatActivity {
             Toast.makeText(this, "Logged Out", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(this,MainActivity.class);
             startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.action_list){
+            navController.navigate(R.id.nav_home,null);
         }
         return super.onOptionsItemSelected(item);
 

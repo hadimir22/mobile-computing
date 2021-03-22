@@ -12,11 +12,11 @@ public class Reminder {
     @ColumnInfo(name = "message")
     private String message ;
     @ColumnInfo(name = "location_x")
-    private String locationX;
+    private double locationX;
     @ColumnInfo(name = "location_y")
-    private String locationY;
+    private double locationY;
     @ColumnInfo(name = "reminder_time")
-    private String reminderTime;
+    private long reminderTime;
     @ColumnInfo(name = "creation_time")
     private String creationTime;
     @ColumnInfo(name = "reminder_seen")
@@ -25,7 +25,7 @@ public class Reminder {
     public Reminder() {
     }
 
-    public Reminder(long creatorId, String message, String locationX, String locationY, String reminderTime, String creationTime, String reminderSeen) {
+    public Reminder(long creatorId, String message, double locationX, double locationY, long reminderTime, String creationTime, String reminderSeen) {
         this.creatorId = creatorId;
         this.message = message;
         this.locationX = locationX;
@@ -51,27 +51,27 @@ public class Reminder {
         this.message = message;
     }
 
-    public String getLocationX() {
+    public double getLocationX() {
         return locationX;
     }
 
-    public void setLocationX(String locationX) {
+    public void setLocationX(double locationX) {
         this.locationX = locationX;
     }
 
-    public String getLocationY() {
+    public double getLocationY() {
         return locationY;
     }
 
-    public void setLocationY(String locationY) {
+    public void setLocationY(double locationY) {
         this.locationY = locationY;
     }
 
-    public String getReminderTime() {
+    public long getReminderTime() {
         return reminderTime;
     }
 
-    public void setReminderTime(String reminderTime) {
+    public void setReminderTime(long reminderTime) {
         this.reminderTime = reminderTime;
     }
 
